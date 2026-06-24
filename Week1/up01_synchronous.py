@@ -1,57 +1,32 @@
-from time import sleep, ctime, time, process_time
-import os
-import threading
-import psutil
+from time import sleep, ctime, time
 
-# Function to simulate LCD screen update
+# ฟังก์ชันจำลองการอัปเดตหน้าจอ LCD ว่ากำลังจัดการคิวให้ลูกค้า
 def update_cup_number(customer_name):
-    pid = os.getpid()
-    thread_id = threading.current_thread().native_id
-    thread_name = threading.current_thread().name
+    print(f"{ctime()} | LCD: Processing for customer {customer_name}...")
+    sleep(1) # จำลองการใช้เวลาอัปเดตระบบ 1 วินาที
+    print(f"{ctime()} | LCD: Done for customer {customer_name}.")
 
-    print(f"{ctime()} | [PID: {pid}] [TID: {thread_id}] [Thread Name: {thread_name}] LCD: Processing for customer {customer_name}...")
-    sum(i * i for i in range(1000000)) # Simulate CPU work
-    sleep(1) # Update takes 1 second
-    print(f"{ctime()} | [PID: {pid}] [TID: {thread_id}] [Thread Name: {thread_name}] LCD: Done for customer {customer_name}.")
-
-# Function to simulate making coffee
+# ฟังก์ชันจำลองการชงกาแฟ
 def make_coffee(customer_name):
-    pid = os.getpid()
-    thread_id = threading.current_thread().native_id
-    thread_name = threading.current_thread().name
-
-    print(f"{ctime()} | [PID: {pid}] [TID: {thread_id}] [Thread Name: {thread_name}] Making coffee for {customer_name}...")
-    sum(i * i for i in range(1000000)) # Simulate CPU work
-    sleep(1) # Brewing takes 1 second
-    print(f"{ctime()} | [PID: {pid}] [TID: {thread_id}] [Thread Name: {thread_name}] Coffee ready for {customer_name}!")
+    print(f"{ctime()} | Making coffee for {customer_name}...")
+    sleep(1) # จำลองระยะเวลาชงกาแฟ 1 วินาที
+    print(f"{ctime()} | Coffee ready for {customer_name}!")
 
 def main():
+    print(f"{ctime()} | === Synchronous Coffee Machine ===")
+    start_time = time() # เริ่มจับเวลาการทำงานทั้งหมด
+    
+    # กำหนดคิวลูกค้า 3 คน
     queue = ['A', 'B', 'C']
-    main_pid = os.getpid()
-    main_tid = threading.current_thread().native_id
-
-    print(f"{ctime()} | [Main PID: {main_pid}] [Main TID: {main_tid}] === Synchronous Coffee Machine ===")
     
-    # Start timer
-    start_time = time()
-    start_cpu = process_time()
-
-    # Sequential execution loop (must finish one task before moving to the next)
+    # วนลูปทำงานแบบ Synchronous (ต้องรอให้เสร็จทีละขั้นตอน ถึงจะไปขั้นต่อไปได้)
     for customer in queue:
-        make_coffee(customer)       # Step 1: Make coffee
-        update_cup_number(customer) # Step 2: Update LCD
-
-    # Calculate final duration and memory usage
-    duration = time() - start_time
-    cpu_duration = process_time() - start_cpu
-    
-    process = psutil.Process(os.getpid())
-    mem_mb = process.memory_info().rss / (1024 * 1024)
-
-    print(f"\n[Summary Synchronous]")
-    print(f"Total Wall Time: {duration:0.2f} seconds")
-    print(f"Total CPU Time: {cpu_duration:0.4f} seconds")
-    print(f"Total Memory (RAM): {mem_mb:.2f} MB")
+        make_coffee(customer)       # ขั้นที่ 1: ชงกาแฟให้เสร็จก่อน
+        update_cup_number(customer) # ขั้นที่ 2: อัปเดตสถานะหน้าจอตามหลัง
+        
+    # คำนวณเวลาที่ใช้ไปทั้งหมด
+    total_time = time() - start_time
+    print(f"{ctime()} | Total time: {total_time:.2f} seconds")
 
 if __name__ == "__main__":
     main()
